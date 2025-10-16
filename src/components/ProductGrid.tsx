@@ -1,8 +1,9 @@
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, Heart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const products = [
   {
@@ -87,11 +88,24 @@ const products = [
   },
 ];
 
+
 const ProductGrid = () => {
+  const [wishlist, setWishlist] = useState<number[]>([]);
+
   const handleAddToCart = (productName: string) => {
     toast.success(`${productName} added to cart!`, {
       description: "Check your cart to complete the purchase",
     });
+  };
+
+  const toggleWishlist = (productId: number, productName: string) => {
+    if (wishlist.includes(productId)) {
+      setWishlist(wishlist.filter(id => id !== productId));
+      toast.info(`${productName} removed from wishlist`);
+    } else {
+      setWishlist([...wishlist, productId]);
+      toast.success(`${productName} added to wishlist!`);
+    }
   };
 
   return (
@@ -108,7 +122,7 @@ const ProductGrid = () => {
           {products.map((product) => (
             <Card
               key={product.id}
-              className="group overflow-hidden hover:shadow-xl transition-all duration-300"
+              className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/20"
             >
               {/* Product Image */}
               <div className="relative overflow-hidden bg-muted">
@@ -119,10 +133,32 @@ const ProductGrid = () => {
                   loading="lazy"
                 />
                 {product.discount > 0 && (
-                  <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground">
+                  <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground font-semibold">
                     -{product.discount}%
                   </Badge>
                 )}
+                
+                {/* Quick Action Buttons */}
+                <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <button
+                    onClick={() => toggleWishlist(product.id, product.name)}
+                    className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
+                      wishlist.includes(product.id) 
+                        ? 'bg-primary text-white' 
+                        : 'bg-white/90 text-primary hover:bg-primary hover:text-white'
+                    }`}
+                    aria-label="Add to wishlist"
+                  >
+                    <Heart className={`h-5 w-5 ${wishlist.includes(product.id) ? 'fill-current' : ''}`} />
+                  </button>
+                  <button
+                    className="p-2 bg-white/90 text-primary rounded-full hover:bg-primary hover:text-white backdrop-blur-sm transition-colors"
+                    aria-label="Quick view"
+                    onClick={() => toast.info("Quick view coming soon!")}
+                  >
+                    <Eye className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
 
               {/* Product Info */}
